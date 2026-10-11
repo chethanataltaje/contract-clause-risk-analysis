@@ -34,11 +34,13 @@ wheels/
 # Jupyter Notebook checkpoints
 .ipynb_checkpoints
 
-# Large datasets & downloaded raw archives
+# Large raw datasets (ignore large downloads, track processed sample files)
 data/raw/*
 !data/raw/.gitkeep
-data/processed/*
-!data/processed/.gitkeep
+*.joblib
+*.bin
+*.pt
+*.onnx
 
 # Saved Model weights (Transformers, embeddings, pickles)
 models/baselines/*

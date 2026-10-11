@@ -1,0 +1,11 @@
+contract_id,category,clause_text
+CONTRACT_004_SAAS,Limitation of Liability,"To the maximum extent permitted by law, Vendor's total aggregate liability arising out of or related to the Cloud Service shall not exceed $50,000 or the subscription fees paid in the last 6 months."
+CONTRACT_004_SAAS,Indemnification,Vendor agrees to defend Customer against any third-party legal claims alleging that Customer's authorized use of the software infringes any valid patent or copyright.
+CONTRACT_004_SAAS,Non-Compete,"Licensee shall not reverse engineer, decompile, or develop a substantially similar competing cloud service utilizing Vendor's benchmark metrics."
+CONTRACT_004_SAAS,Renewal / Term,The subscription term shall automatically renew for additional consecutive periods equal to twelve (12) months unless either party provides notice of non-renewal at least 30 days prior to expiration.
+CONTRACT_004_SAAS,Termination for Convenience,"Customer may terminate the subscription for convenience upon forty-five (45) days prior written notice, subject to forfeiture of prepaid fees."
+CONTRACT_007_PROCURE,Limitation of Liability,Neither Supplier nor Purchaser shall be liable for indirect or punitive damages; Supplier liability for defective hardware is strictly capped at product replacement costs.
+CONTRACT_007_PROCURE,Termination for Convenience,Purchaser reserves the right to terminate any Purchase Order without penalty upon twenty-one (21) days notice to Supplier.
+CONTRACT_007_PROCURE,Indemnification,Supplier warrants product compliance and agrees to defend Purchaser from IP infringement actions brought by third parties.
+CONTRACT_007_PROCURE,Confidentiality,"All unit pricing models, discount schedules, and specifications are confidential trade secrets."
+CONTRACT_007_PROCURE,Renewal / Term,The procurement term shall continue for twenty-four (24) months and renew annually upon mutual written consent.

@@ -1,0 +1,30 @@
+contract_id,category,clause_text
+CONTRACT_001_MSA,Limitation of Liability,"In no event shall either party's cumulative liability under this Agreement exceed the total fees paid in the preceding twelve (12) months, or $100,000, whichever is less."
+CONTRACT_001_MSA,Termination for Convenience,Either party may terminate this Agreement for any reason or no reason upon delivering sixty (60) days prior written notice to the other party.
+CONTRACT_001_MSA,Indemnification,"Provider shall indemnify, defend, and hold harmless Client from and against any third-party claims, liabilities, losses, and damages arising out of Provider's gross negligence or willful misconduct."
+CONTRACT_001_MSA,Confidentiality,Each party agrees to maintain in strict confidence all proprietary technical and business information disclosed by the other party for a period of five (5) years following disclosure.
+CONTRACT_001_MSA,Renewal / Term,"This Agreement shall commence on the Effective Date and remain in effect for an initial period of two (2) years, renewing automatically for successive one (1) year terms unless terminated."
+CONTRACT_002_NDA,Confidentiality,The Recipient shall hold all Confidential Information in confidence and shall not disclose such information to any third party without prior written authorization from Disclosing Party.
+CONTRACT_002_NDA,Limitation of Liability,"Except for breaches of confidentiality obligations, neither party shall be liable for indirect, incidental, punitive, or consequential damages."
+CONTRACT_002_NDA,Renewal / Term,The term of confidentiality shall expire three (3) years from the date of initial disclosure of the applicable Confidential Information.
+CONTRACT_002_NDA,Termination for Convenience,Disclosing Party may terminate discussions and demand return of all proprietary materials with seven (7) days written notice.
+CONTRACT_003_EMP,Non-Compete,"Employee agrees that during employment and for a period of twelve (12) months following termination, Employee shall not directly or indirectly engage in or operate any competing business within a 50-mile radius."
+CONTRACT_003_EMP,Confidentiality,"Employee shall not at any time, during or after employment, use or disclose Employer's proprietary customer lists, trade secrets, or source code."
+CONTRACT_003_EMP,Termination for Convenience,"Employer may terminate Employee's employment at will, with or without cause, provided Employer gives thirty (30) days written notice or pay in lieu thereof."
+CONTRACT_003_EMP,Indemnification,Employer agrees to indemnify Employee to the maximum extent permitted by applicable law for actions performed within the scope of regular employment duties.
+CONTRACT_005_CONSULT,Indemnification,"Consultant agrees to indemnify and hold harmless Company from any claims, damages, or fines arising from Consultant's failure to comply with statutory tax obligations."
+CONTRACT_005_CONSULT,Limitation of Liability,"In no event shall Company be liable for lost profits, loss of data, or special damages, and total liability shall be capped at $25,000."
+CONTRACT_005_CONSULT,Non-Compete,"During the term and for six (6) months thereafter, Consultant shall not solicit any active clients of Company whom Consultant worked with directly."
+CONTRACT_005_CONSULT,Confidentiality,All deliverables and proprietary market analyses generated under this statement of work remain strictly confidential Company property.
+CONTRACT_005_CONSULT,Termination for Convenience,Either party may terminate any ongoing Statement of Work with fourteen (14) days advance notice in writing.
+CONTRACT_005_CONSULT,Renewal / Term,This agreement shall be valid for a duration of one (1) year from signature and may be renewed by mutual written amendment.
+CONTRACT_006_LEASE,Termination for Convenience,"Tenant shall have the right to early terminate this Lease after Month 24 upon giving ninety (90) days advance written notice and paying a penalty fee of $15,000."
+CONTRACT_006_LEASE,Limitation of Liability,Landlord's liability for any default or damage under this lease shall be strictly limited to Landlord's equity interest in the leased commercial building.
+CONTRACT_006_LEASE,Indemnification,"Tenant covenants to indemnify and hold Landlord harmless against any slip-and-fall injuries, damages, or liabilities occurring within the premises."
+CONTRACT_006_LEASE,Renewal / Term,Tenant is granted an option to renew the lease for an additional term of thirty-six (36) months by written notice delivered at least 180 days prior to expiration.
+CONTRACT_008_PARTNER,Non-Compete,"Neither partner shall establish, finance, or advise an entity operating in direct competition with the Joint Venture for two (2) years following dissolution."
+CONTRACT_008_PARTNER,Confidentiality,"Both partners agree not to disclose financial records, audit findings, or intellectual property without unanimous written consent."
+CONTRACT_008_PARTNER,Indemnification,Each partner shall indemnify the partnership for liabilities incurred as a result of unauthorized commitments made outside specified authority.
+CONTRACT_008_PARTNER,Limitation of Liability,"Liability between partners for operational errors shall be capped at each partner's respective initial capital contribution of $200,000."
+CONTRACT_008_PARTNER,Termination for Convenience,Either partner may exit the partnership upon providing one hundred eighty (180) days advance notice to initiate orderly asset liquidation.
+CONTRACT_008_PARTNER,Renewal / Term,The partnership term shall run for five (5) years from the Effective Date.
