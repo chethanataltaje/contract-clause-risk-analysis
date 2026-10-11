@@ -1,0 +1,26 @@
+# Core Scientific & Data Processing
+numpy>=1.26.0
+pandas>=2.1.0
+
+# Document & PDF Extraction
+PyMuPDF>=1.23.0
+
+# Classical NLP & Machine Learning (Unit 1 & Unit 2)
+scikit-learn>=1.4.0
+nltk>=3.8.1
+
+# Semantic Embeddings & Transformers (Unit 2 & Unit 3)
+sentence-transformers>=2.5.0
+transformers>=4.38.0
+torch>=2.2.0
+datasets>=2.18.0
+
+# UI, Visualization & Reporting
+streamlit>=1.32.0
+matplotlib>=3.8.0
+seaborn>=0.13.0
+plotly>=5.19.0
+
+# Testing & Utilities
+pytest>=8.0.0
+python-dotenv>=1.0.0

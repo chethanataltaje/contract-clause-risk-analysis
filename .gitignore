@@ -1,0 +1,62 @@
+# Environments & Virtual Envs
+venv/
+.venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Python cache & bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Secrets & Local Configurations
+.env
+*.env.local
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
+
+# Large datasets & downloaded raw archives
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+
+# Saved Model weights (Transformers, embeddings, pickles)
+models/baselines/*
+!models/baselines/.gitkeep
+models/embeddings/*
+!models/embeddings/.gitkeep
+models/transformer/*
+!models/transformer/.gitkeep
+
+# IDE & Editor specific
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Operating System files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store
