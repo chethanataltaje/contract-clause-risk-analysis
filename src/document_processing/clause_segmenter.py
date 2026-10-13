@@ -9,7 +9,7 @@ from typing import List, Dict, Any
 
 # Section splitter pattern for legal documents
 SECTION_PATTERN = re.compile(
-    r"(?=(?:^|\n)\s*(?:SECTION\s+[0-9IVXLCDM]+|ARTICLE\s+[0-9IVXLCDM]+|[0-9]{1,2}\.\s+[A-Z]))",
+    r"(?=(?:^|\n)\s*(?:SECTION\s+[0-9IVXLCDM]+|ARTICLE\s+[0-9IVXLCDM]+|[0-9]{1,2}(?:\.[0-9]{1,2})*\.?\s+[A-Za-z]))",
     re.IGNORECASE
 )
 
@@ -29,11 +29,15 @@ def segment_into_clauses(pages: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
             continue
 
         # Split on section headings or numbered markers
-        raw_parts = SECTION_PATTERN.split(page_text)
+        raw_parts = [p.strip() for p in SECTION_PATTERN.split(page_text) if p.strip()]
         
-        # If no section headings found, split on double linebreaks
+        # If no section headings found or only single block, split on double linebreaks
         if len(raw_parts) <= 1:
-            raw_parts = re.split(r"\n\s*\n", page_text)
+            raw_parts = [p.strip() for p in re.split(r"\n\s*\n", page_text) if p.strip()]
+
+        # If still only 1 block and page is substantial, split on single linebreaks before capital letters
+        if len(raw_parts) <= 1 and len(page_text) > 200:
+            raw_parts = [p.strip() for p in re.split(r"\n(?=[A-Z0-9])", page_text) if p.strip()]
 
         for part in raw_parts:
             part_clean = part.strip()

@@ -61,6 +61,8 @@ def score_clause_risk(
         "clause_text": clause_text,
         "predicted_category": category,
         "confidence": confidence,
+        "model_used": classification_result.get("model_used", "baseline"),
+        "top_predictions": classification_result.get("top_predictions", []),
         "risk_level": risk_level,
         "risk_score": risk_score,
         "triggered_rules": triggered_rules,

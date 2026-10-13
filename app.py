@@ -226,6 +226,41 @@ st.markdown("""
         padding: 3px 8px;
         border-radius: 4px;
     }
+    .engine-tag {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.70rem;
+        font-weight: 600;
+        padding: 3px 8px;
+        border-radius: 4px;
+        display: inline-flex;
+        align-items: center;
+        letter-spacing: 0.02em;
+    }
+    .engine-sbert {
+        background: #eff6ff;
+        color: #1d4ed8;
+        border: 1px solid #93c5fd;
+    }
+    .engine-baseline {
+        background: #f5f3ff;
+        color: #6d28d9;
+        border: 1px solid #c4b5fd;
+    }
+    .prob-bar-container {
+        margin-top: 0.45rem;
+        background: #f8fafc;
+        border-radius: 6px;
+        padding: 0.45rem 0.65rem;
+        border: 1px solid #e2e8f0;
+    }
+    .prob-item {
+        display: flex;
+        justify-content: space-between;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.72rem;
+        color: #475569;
+        padding: 1.5px 0;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -249,12 +284,20 @@ def main():
 
     # Workspace Control Bar
     ctrl_col1, ctrl_col2, ctrl_col3 = st.columns([2, 2, 1])
+    with ctrl_col3:
+        uploaded_file = st.file_uploader(
+            "Upload Custom PDF",
+            type=["pdf"],
+            label_visibility="collapsed"
+        )
     with ctrl_col1:
-        sample_options = {
-            "Master Services Agreement (MSA)": "sample_msa.pdf",
-            "Non-Disclosure Agreement (NDA)": "sample_nda.pdf",
-            "Employment Covenant": "sample_employment.pdf"
-        }
+        sample_options = {}
+        if uploaded_file is not None:
+            sample_options[f"📁 {uploaded_file.name}"] = "__UPLOADED__"
+        sample_options["Master Services Agreement (MSA)"] = "sample_msa.pdf"
+        sample_options["Non-Disclosure Agreement (NDA)"] = "sample_nda.pdf"
+        sample_options["Employment Covenant"] = "sample_employment.pdf"
+
         chosen_sample = st.selectbox(
             "Load Contract",
             options=list(sample_options.keys()),
@@ -267,26 +310,27 @@ def main():
             format_func=lambda x: "Lexical Engine (TF-IDF + LR)" if x == "baseline" else "Semantic Engine (Sentence-BERT)",
             label_visibility="collapsed"
         )
-    with ctrl_col3:
-        uploaded_file = st.file_uploader(
-            "Upload Custom PDF",
-            type=["pdf"],
-            label_visibility="collapsed"
-        )
 
     # Resolve document bytes
-    doc_name = chosen_sample
+    target_source = sample_options[chosen_sample]
     pdf_bytes = None
+    doc_name = chosen_sample
 
-    if uploaded_file is not None:
-        pdf_bytes = uploaded_file.read()
+    if target_source == "__UPLOADED__" and uploaded_file is not None:
+        pdf_bytes = uploaded_file.getvalue()
         doc_name = uploaded_file.name
     else:
-        sample_file = sample_options[chosen_sample]
+        sample_file = target_source
         sample_path = SAMPLE_CONTRACTS_DIR / sample_file
         if sample_path.exists():
             with open(sample_path, "rb") as f:
                 pdf_bytes = f.read()
+        doc_name = chosen_sample
+
+    # Reset selected clause index whenever document changes
+    if "current_doc_id" not in st.session_state or st.session_state.current_doc_id != doc_name:
+        st.session_state.current_doc_id = doc_name
+        st.session_state.selected_clause_idx = 0
 
     if not pdf_bytes:
         st.warning("No document available.")
@@ -296,6 +340,22 @@ def main():
     service = get_analysis_service(model_choice)
     result = service.analyze_contract_pdf(pdf_bytes, filename=doc_name)
     clauses = result["clauses"]
+
+    if not clauses:
+        st.markdown("""
+        <div style="background:#fff1f2; border:1px solid #fecdd3; border-radius:8px; padding:1.25rem 1.5rem; margin-top:1.5rem;">
+            <div style="font-weight:700; color:#e11d48; font-size:1.05rem; margin-bottom:0.4rem;">⚠️ No Extractable Clauses Detected</div>
+            <div style="color:#4c0519; font-size:0.9rem; line-height:1.5;">
+                We could not extract readable legal text from this PDF document. This usually happens if:
+                <ul style="margin-top:0.4rem; margin-bottom:0.4rem;">
+                    <li><strong>Scanned Image / Raster PDF</strong>: The PDF consists of image scans rather than selectable text (requires an OCR layer).</li>
+                    <li><strong>Protected Document</strong>: The PDF has restricted permissions preventing text layer extraction.</li>
+                </ul>
+                <em>Tip: Please ensure your uploaded PDF contains selectable text (not a scanned image), or choose one of the built-in contracts above.</em>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        return
 
     # State tracking for selected clause
     if "selected_clause_idx" not in st.session_state or st.session_state.selected_clause_idx >= len(clauses):
@@ -336,6 +396,29 @@ def main():
         r_lvl = selected_cl["risk_level"]
         badge_cls = "badge-critical" if r_lvl == "High Risk" else ("badge-amber" if r_lvl == "Needs Review" else "badge-slate")
 
+        # Resolve active model metadata
+        active_model = selected_cl.get("model_used", model_choice)
+        if active_model == "sbert":
+            engine_short_label = "⚡ Sentence-BERT"
+            engine_tag_cls = "engine-sbert"
+            engine_full_title = "Semantic Engine — Sentence-BERT (all-MiniLM-L6-v2)"
+            engine_desc = "Dense 384-d contextual vectors with cosine similarity classification"
+        else:
+            engine_short_label = "📐 TF-IDF + LR"
+            engine_tag_cls = "engine-baseline"
+            engine_full_title = "Lexical Baseline — TF-IDF + Logistic Regression"
+            engine_desc = "Sublinear n-gram (1,2) vocabulary matching with L2 penalty"
+
+        # Alternative candidate classes
+        top_preds = selected_cl.get("top_predictions", [])
+        if top_preds and len(top_preds) > 1:
+            alt_lines = []
+            for cand in top_preds[1:]:
+                alt_lines.append(f"<div class='prob-item'><span>{cand['category']}</span><span>{cand['probability']*100:.1f}%</span></div>")
+            alt_html = f"<div class='prob-bar-container'><div style='font-size:0.67rem; color:#64748b; font-weight:600; text-transform:uppercase; margin-bottom:3px;'>Alternative Candidates:</div>{''.join(alt_lines)}</div>"
+        else:
+            alt_html = ""
+
         ents = selected_cl.get("extracted_entities", {})
         ling = selected_cl.get("linguistic_summary", {})
 
@@ -351,7 +434,15 @@ def main():
 
         panel_html = (
             '<div class="inspector-panel">'
-            '<div class="inspector-header">Clause Audit Inspector</div>'
+            '<div class="inspector-header" style="display:flex; justify-content:space-between; align-items:center;">'
+            '<span>Clause Audit Inspector</span>'
+            f'<span class="engine-tag {engine_tag_cls}">{engine_short_label}</span>'
+            '</div>'
+            '<div class="inspector-field">'
+            '<div class="field-title">Active AI Engine</div>'
+            f'<div class="field-value" style="font-size:0.88rem; color:#0f172a;">{engine_full_title}</div>'
+            f'<div style="font-size:0.72rem; color:#64748b; margin-top:2px;">{engine_desc}</div>'
+            '</div>'
             '<div class="inspector-field">'
             '<div class="field-title">Clause Identification</div>'
             f'<div class="field-value" style="font-family:\'JetBrains Mono\', monospace; font-size:0.85rem;">{selected_cl["clause_id"]} &middot; Page {selected_cl["page_number"]}</div>'
@@ -359,6 +450,7 @@ def main():
             '<div class="inspector-field">'
             '<div class="field-title">Predicted Legal Classification</div>'
             f'<div class="field-value">{selected_cl["predicted_category"]} <span style="font-size:0.75rem; color:#64748b; font-weight:400;">({selected_cl["confidence"]*100:.1f}% confidence)</span></div>'
+            f'{alt_html}'
             '</div>'
             '<div class="inspector-field">'
             '<div class="field-title">Risk Assessment Tier</div>'

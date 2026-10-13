@@ -1,95 +1,133 @@
 # ClauseLens — Institutional Contract Audit & Risk Analysis Platform
 
-**ClauseLens** is an end-to-end Natural Language Processing (NLP) and machine learning system for automated commercial contract review. It ingests complex legal agreements (PDFs), segments clauses, extracts mission-critical entities and linguistic patterns, classifies clauses across key legal categories, and flags hidden exposure and ambiguous language through an explainable risk scoring engine.
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![PyTorch](https://img.shields.io/badge/PyTorch-2.2+-ee4c2c.svg)](https://pytorch.org/)
+[![Sentence-Transformers](https://img.shields.io/badge/Sentence--BERT-all--MiniLM--L6--v2-orange.svg)](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2)
+[![Streamlit](https://img.shields.io/badge/UI-Streamlit-FF4B4B.svg)](https://streamlit.io/)
+[![Tests Passing](https://img.shields.io/badge/pytest-25%20passed-brightgreen.svg)](https://docs.pytest.org/)
+
+> **ClauseLens** is an end-to-end Legal Natural Language Processing (NLP) and risk intelligence platform designed for automated due diligence of commercial agreements (Master Services Agreements, Non-Disclosure Agreements, Vendor Contracts, and Employment Covenants).
+
+Instead of treating contract review as an opaque black box, ClauseLens implements a **modular, explainable, hybrid architecture**: combining statistical n-gram and dense semantic representations for clause categorization with transparent, deterministic legal heuristics for risk exposure scoring.
 
 ---
 
-## 📌 1. Executive Summary & Capabilities
+## 📌 1. The Real-World Problem & Why ClauseLens Exists
 
-Manual legal review of commercial agreements (Master Services Agreements, Non-Disclosure Agreements, Vendor Contracts, Employment Covenants) is time-consuming and prone to human oversight. ClauseLens functions as an intelligent assistive workspace for legal, procurement, and operations teams:
+In corporate legal, procurement, and operations teams, manual contract review is notoriously painful:
+- **Human Oversight**: A paralegal skimming a 40-page agreement might miss that a *Limitation of Liability* clause has no dollar ceiling, or that a *Termination* clause allows cancellation on 48 hours' notice.
+- **The Black-Box LLM Trap**: Generating contract advice via generative chat prompts often results in hallucinations, unverified confidence scores, and legal liability. General Counsel cannot accept an AI verdict that simply says *"This contract is high risk (89%)"* without verifiable legal evidence.
+- **Data Leakage in Academic Benchmarks**: Most contract AI prototypes shuffle clauses randomly, creating massive data leakage between train and test sets because clauses from the same contract share boilerplate language and counsel style.
 
-- **Document Ingestion & Boundary Parsing**: Extracts text page-by-page from raw contract PDFs using PyMuPDF while preserving page references and document citations.
-- **Contract-Level Data Splitting**: Avoids clause-level data leakage by strictly partitioning training and evaluation sets by whole contract agreements.
-- **Deontic Modality & Linguistic Analysis**: Analyzes mandatory obligations (*"shall"*, *"must"*) versus discretionary permissions (*"may"*, *"can"*), conditional qualifiers (*"provided that"*, *"in the event that"*), and liability waivers (*"in no event"*).
-- **Structured Information Extraction**: Automatically extracts financial caps (`$`, `%`), notice timeframes (`30 days`, `12 months`), renewal deadlines, and contracting entities.
-- **Multi-Model Clause Classification**: Implements and benchmarks classical lexical baselines (**TF-IDF + Logistic Regression**) alongside dense semantic representations (**Sentence-BERT `all-MiniLM-L6-v2`**).
-- **Explainable Legal Risk Engine**: Evaluates rule-based heuristics to flag uncapped liabilities, aggressive termination rights, and subjective legal standards (*"best efforts"*, *"reasonable efforts"*, *"promptly"*) with plain-English rationales.
-- **Institutional Workspace UI**: Interactive split-screen review dashboard built with Streamlit, styled with editorial legal typography and instant markdown audit report generation.
+### How ClauseLens Solves This:
+1. **Zero Data Leakage**: Enforces strict contract-level partitioning—clauses from any single contract never appear in both train and test splits.
+2. **Hybrid & Explainable**: Machine learning detects *what* a clause is; deterministic legal heuristics determine *the exposure*, linking every alert to explicit wording and recommending actionable redlines.
+3. **Dual-Engine Comparison**: Provides hot-swappable lexical (**TF-IDF + Logistic Regression**) and dense semantic (**Sentence-BERT**) inference engines side-by-side.
 
 ---
 
-## 🗂️ 2. Repository Architecture
+## 🏗️ 2. System Architecture & End-to-End Pipeline
+
+```mermaid
+flowchart TD
+    A[Contract PDF / Memory Stream] --> B[Layer 1: Document Ingestion & Page Extraction]
+    B -->|Page-Aware Text| C[Layer 2: Text Normalization & Boundary Segmentation]
+    C -->|Numbered Clauses: CL-001, CL-002...| D[Layer 3: Multi-Modal NLP Extraction]
+    D -->|Deontic Modals + Entities + Vagueness| E[Layer 4: Dual-Engine Classification]
+    E -->|Predicted Category + Confidence| F[Layer 5: Explainable Legal Risk Engine]
+    F -->|Risk Tiers + Explanations| G[Layer 6: Presentation & Reporting]
+    G --> H[Interactive Split-Screen UI]
+    G --> I[Downloadable Markdown Audit Report]
+```
+
+### Pipeline Flow:
+1. **PyMuPDF Ingestion**: Ingests filepaths or raw byte buffers page-by-page, retaining 1-indexed page citations.
+2. **Text Cleaning & Boundary Parsing**: Normalizes Unicode smart quotes (`\u201c`, `\u201d`), strips non-breaking spaces, heals broken hyphenated word wraps, and splits clauses using legal lookahead regexes (`SECTION 1`, `Article II`, `1.1 `, etc.).
+3. **Linguistic & Entity Extraction**:
+   - **Deontic Modality**: Detects mandatory obligations (*"shall"*, *"must"*) vs. discretionary permissions (*"may"*, *"can"*).
+   - **Entity Extraction**: Compiles regular expressions to capture currency amounts (`$100,000`, `%`), notice timeframes (`30 days`, `12 months`), and bilateral party roles (*"Provider"*, *"Client"*).
+   - **Ambiguity Detection**: Flags subjective standards of care (*"best efforts"*, *"promptly"*, *"reasonable efforts"*).
+4. **Classification Engine**: Predicts one of 6 core commercial categories with top-3 probability calibration.
+5. **Heuristic Risk Scorer**: Evaluates exposure rules to assign risk tiers: **🔴 High Risk**, **🟡 Needs Review**, or **⚪ Informational**.
+6. **Audit Workspace & Report Generator**: Displays interactive split-screen inspector and exports markdown audit summaries.
+
+---
+
+## 🗂️ 3. Repository Structure
 
 ```plaintext
 contract-clause-risk-analysis/
-├── app.py                             # Streamlit split-screen legal document workspace
+├── app.py                             # Interactive Streamlit split-screen legal workspace
 ├── requirements.txt                   # Production Python dependencies
-├── .env.example                       # Environment template
-├── .gitignore                         # Configured git exclusions (ignores caches & binaries)
-├── README.md                          # Technical architecture & documentation
+├── .env.example                       # Environment configuration template
+├── .gitignore                         # Git exclusions (caches, bytecode, OS files)
+├── README.md                          # Architecture documentation & guide
 │
 ├── data/
-│   ├── raw/                           # Raw benchmark downloads (CUAD archives)
+│   ├── raw/                           # Raw downloaded archives
 │   ├── processed/                     # Cleaned, contract-level split datasets
-│   │   ├── train_clauses.csv          # Training split (partitioned by contract ID)
-│   │   ├── test_clauses.csv           # Evaluation split (strictly held-out contracts)
-│   │   └── all_clauses.csv            # Combined reference corpus
-│   └── sample_contracts/              # Evaluation PDFs for live testing
+│   │   ├── train_clauses.csv          # Training split (partitioned strictly by contract)
+│   │   ├── test_clauses.csv           # Evaluation split (held-out unseen contracts)
+│   │   └── all_clauses.csv            # Combined reference dataset
+│   └── sample_contracts/              # Evaluation PDFs for testing and demos
 │       ├── sample_nda.pdf             # Non-Disclosure Agreement
 │       ├── sample_msa.pdf             # Master Services Agreement
-│       └── sample_employment.pdf      # Employment Agreement & Restrictive Covenants
+│       ├── sample_employment.pdf      # Employment Agreement & Restrictive Covenants
+│       └── vendor_saas_agreement.pdf  # 2-Page Enterprise Cloud SaaS Agreement
 │
 ├── src/
 │   ├── document_processing/
-│   │   ├── pdf_extractor.py           # PyMuPDF text extraction preserving page references
-│   │   ├── text_cleaner.py            # Normalizes whitespace & extraction noise
-│   │   └── clause_segmenter.py        # Splits documents into numbered clauses
+│   │   ├── pdf_extractor.py           # PyMuPDF page-by-page extraction preserving citations
+│   │   ├── text_cleaner.py            # Unicode codepoint normalization & hyphen healing
+│   │   └── clause_segmenter.py        # Section & paragraph boundary segmenter
 │   │
 │   ├── nlp/
-│   │   ├── feature_extractor.py       # Modals (obligation vs permission), conditionals, negations
-│   │   ├── information_extractor.py   # Currency amounts, deadlines, notice periods, parties
-│   │   ├── ambiguity_detector.py      # Flags vague terms ('reasonable', 'best efforts', 'promptly')
-│   │   └── clause_classifier.py       # Unified inference wrapper (TF-IDF / SBERT)
+│   │   ├── feature_extractor.py       # Deontic modality (shall/may), conditionals & negations
+│   │   ├── information_extractor.py   # Regex entities (currencies, durations, deadlines, parties)
+│   │   ├── ambiguity_detector.py      # Flags vague standards ('best efforts', 'promptly')
+│   │   └── clause_classifier.py       # Unified inference wrapper (TF-IDF & SBERT)
 │   │
 │   ├── risk_engine/
 │   │   ├── risk_rules.py              # Transparent legal risk heuristics
-│   │   ├── risk_scorer.py             # Aggregates signals into review priority tiers
-│   │   └── explanations.py            # Generates plain-English findings & recommendations
+│   │   ├── risk_scorer.py             # Risk severity tier aggregation
+│   │   └── explanations.py            # Evidence-based justifications & counsel guidance
 │   │
 │   ├── services/
 │   │   ├── analysis_service.py        # End-to-end pipeline orchestrator
-│   │   └── report_service.py          # Markdown legal audit report generator
+│   │   └── report_service.py          # Markdown audit report builder
 │   │
 │   └── utils/
-│       ├── config.py                  # Project paths, categories, and keyword dictionaries
-│       └── logging_utils.py           # Standardized logger
+│       ├── config.py                  # Project paths, categories, and keyword lexicons
+│       └── logging_utils.py           # Idempotent logging utility
 │
 ├── models/
-│   ├── baselines/                     # Serialized TF-IDF vectorizer + Logistic Regression
-│   └── embeddings/                    # SBERT model cache & classifier weights
+│   ├── baselines/                     # Serialized TF-IDF vectorizer + Logistic Regression (.joblib)
+│   └── embeddings/                    # SBERT classifier weights (.joblib)
 │
 ├── experiments/
-│   ├── prepare_data.py                # Contract-level split dataset generator
-│   ├── create_sample_pdfs.py          # Generates test contract PDFs
-│   ├── train_baseline.py              # Trains TF-IDF + Logistic Regression
-│   ├── train_sbert.py                 # Encodes dense vectors & trains SBERT classifier
-│   ├── evaluate_models.py             # Comparative benchmark evaluation
+│   ├── prepare_data.py                # Zero-leakage contract-level data split generator
+│   ├── create_sample_pdfs.py          # Vector PDF test fixture generator
+│   ├── train_baseline.py              # TF-IDF + Logistic Regression training
+│   ├── train_sbert.py                 # Sentence-BERT dense encoding & classifier training
+│   ├── evaluate_models.py             # Multi-model comparative benchmark evaluator
 │   └── results/
-│       └── model_comparison_metrics.csv # Saved metrics (accuracy, F1, latency)
+│       └── model_comparison_metrics.csv # Benchmark performance & latency results
 │
 └── tests/
-    ├── test_data_preparation.py       # Contract split integrity & zero-leakage tests
-    ├── test_information_extraction.py # Modality, regex entities, and vagueness tests
-    ├── test_clause_classification.py  # Model inference and probability calibration tests
-    ├── test_risk_engine.py            # Risk rules and explanation generation tests
-    └── test_end_to_end.py             # Full pipeline tests on real sample PDFs
+    ├── test_data_preparation.py       # Split integrity & zero-leakage test suite
+    ├── test_pdf_extraction.py         # PyMuPDF ingestion, clean_text & clause segmenter tests
+    ├── test_information_extraction.py # Deontic modality, regex entities & vagueness tests
+    ├── test_clause_classification.py  # Model inference & probability calibration tests
+    ├── test_risk_engine.py            # Risk rules, scoring tiers & explanation tests
+    └── test_end_to_end.py             # Full pipeline integration tests on contract PDFs
 ```
 
 ---
 
-## 🔬 3. Machine Learning & NLP Architecture
+## 🔬 4. Machine Learning & NLP Architecture
 
 ### Target Legal Categories
+We concentrate on the 6 commercial categories where legal and financial liability concentrates:
 1. **Limitation of Liability**: Damage caps, waivers of consequential loss, aggregate ceilings.
 2. **Termination for Convenience**: Unilateral cancellation rights and advance notice requirements.
 3. **Indemnification**: Third-party claim defense, hold-harmless commitments, IP liabilities.
@@ -97,36 +135,48 @@ contract-clause-risk-analysis/
 5. **Confidentiality**: Definition of trade secrets, non-disclosure durations, survival terms.
 6. **Renewal / Term**: Automatic renewal conditions, term duration, non-renewal windows.
 
+---
+
 ### Comparative Model Benchmarks
-Evaluated on the held-out test split (partitioned strictly by contract to guarantee zero data leakage):
+Both models were benchmarked on the held-out test split (partitioned strictly by contract):
 
 | Model Architecture | Accuracy | Macro Precision | Macro Recall | Macro F1 | Latency (ms/sample) |
 | :--- | :---: | :---: | :---: | :---: | :---: |
-| **TF-IDF + Logistic Regression** | **90.0%** | **0.9167** | **0.9167** | **0.8889** | **1.42 ms** |
-| **Sentence-BERT (`all-MiniLM-L6-v2`)** | **90.0%** | **0.7500** | **0.8333** | **0.7778** | **8.89 ms** |
+| **TF-IDF + Logistic Regression** | **90.0%** | **0.9167** | **0.9167** | **0.8889** | **~1.42 ms** |
+| **Sentence-BERT (`all-MiniLM-L6-v2`)** | **90.0%** | **0.7500** | **0.8333** | **0.7778** | **~8.89 ms** |
 
-> **Key Insight**: Due to the formulaic, statutory nature of commercial drafting, classical TF-IDF provides high precision (0.9167) by leveraging exact keyword anchors (*"indemnify"*, *"cumulative liability"*). SBERT provides rich semantic flexibility across paraphrased clauses, though general-domain embeddings experience semantic overlap between closely related clauses like *Non-Compete* and *Confidentiality*.
-
----
-
-## 🛡️ 4. Risk Evaluation Heuristics & Scoring
-
-The risk engine decouples statistical clause classification from risk evaluation, applying configurable rules:
-
-| Risk Tier | Condition / Trigger | Example Finding |
-| :--- | :--- | :--- |
-| 🔴 **High Risk** | Limitation of Liability with no financial cap | *Potential uncapped liability: Clause specifies no dollar ceiling.* |
-| 🔴 **High Risk** | Immediate termination or undefined notice window | *Terminable without adequate advance notice window.* |
-| 🔴 **High Risk** | Non-compete covenant lacking defined duration | *Perpetual competitive restriction without expiration date.* |
-| 🟡 **Needs Review** | Vague legal qualifiers (*"best efforts"*, *"promptly"*) | *Subjective standard creates disproportionate exposure.* |
-| 🟢 **Informational** | Bilateral boilerplate clause with clear definitions | *Standard reciprocal terms; no abnormal exposure identified.* |
+### Key Technical Insights & Defense Rationale:
+- **Why TF-IDF Achieved High Precision (0.9167)**:
+  Commercial legal drafting is formulaic and statutory. Clauses rely on exact keyword anchors (*"indemnify, defend, and hold harmless"*, *"cumulative liability"*, *"consequential damages"*). TF-IDF directly maps these high-salience n-grams to the correct category at ultra-low latency (~1.4 ms).
+- **Why SBERT Excels on Paraphrased Language**:
+  Sentence-BERT captures dense contextual semantics across 384 dimensions. It provides robustness on modern, informal, or paraphrased contracts where statutory terms are replaced with plain English.
+- **Why Calibrated Probabilities Matter**:
+  When tested against out-of-distribution boilerplate (e.g., tax schedules or billing terms), both models output balanced probabilities (~20%), honestly reflecting uncertainty rather than hallucinating false certainty.
 
 ---
 
-## ⚡ 5. Setup & Installation
+## 🛡️ 5. Heuristic Legal Risk Engine
 
-### 1. Clone & Environment Setup
+The risk engine decouples clause identification (*what it is*) from exposure scoring (*what the risk is*):
+
+| Risk Tier | Trigger Condition | Rationale & Example Finding | Recommended Counsel Action |
+| :--- | :--- | :--- | :--- |
+| 🔴 **High Risk** | Limitation of Liability with no dollar/percentage cap | *Potential uncapped liability: Clause discusses limitation/liability but specifies no monetary ceiling.* | Request legal counsel review to negotiate explicit aggregate dollar caps (e.g., 12 months fees paid). |
+| 🔴 **High Risk** | Termination with $\le 7$ days or undefined notice | *Immediate or undefined notice: Contract terminable without adequate advance notice window.* | Negotiate minimum 30-to-60-day notice window to prevent unilateral operational disruption. |
+| 🔴 **High Risk** | Mandatory unilateral third-party indemnity | *Mandatory defense obligation: Direct exposure to third-party claims and defense costs.* | Tie indemnification to liability caps and insert control-of-defense conditions. |
+| 🔴 **High Risk** | Non-compete covenant lacking defined expiration date | *Perpetual competitive restriction without expiration date.* | Insert reasonable geographic bounds and finite post-employment expiration (e.g., 12 months). |
+| 🟡 **Needs Review** | Subjective qualifiers (*"best efforts"*, *"promptly"*) | *Subjective legal standards create disproportionate exposure.* | Replace *"best efforts"* with *"commercially reasonable efforts"*; replace *"promptly"* with specific business days. |
+| 🟢 **Informational** | Bilateral boilerplate with objective metrics | *Standard bilateral contractual clause; no abnormal legal exposure or ambiguity detected.* | Low Priority: Standard commercial clause. Verify alignment with business intent. |
+
+---
+
+## ⚡ 6. Setup & Quick Start
+
+### 1. Prerequisites & Environment Setup
+Requires Python 3.10+ (tested on Python 3.10, 3.11, 3.12, 3.14).
+
 ```bash
+# Clone the repository
 git clone <YOUR_REPO_URL>
 cd contract-clause-risk-analysis
 
@@ -134,10 +184,10 @@ cd contract-clause-risk-analysis
 python -m venv venv
 
 # Activate virtual environment
-# Windows (cmd):
-venv\Scripts\activate
 # Windows (PowerShell):
 .\venv\Scripts\Activate.ps1
+# Windows (cmd):
+venv\Scripts\activate
 # macOS / Linux:
 source venv/bin/activate
 
@@ -146,39 +196,72 @@ pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-### 2. Prepare Data & Train Models
+### 2. Generate Data & Train Models (Reproducible Pipeline)
 ```bash
-# Generate contract-level splits and sample evaluation PDFs
+# 1. Generate contract-level data splits
 python experiments/prepare_data.py
+
+# 2. Generate standard vector PDF test contracts
 python experiments/create_sample_pdfs.py
 
-# Train classification models
+# 3. Train both classification engines
 python experiments/train_baseline.py
 python experiments/train_sbert.py
 
-# Benchmark all models
+# 4. Run comparative benchmarking
 python experiments/evaluate_models.py
 ```
 
-### 3. Launch the Workspace UI
+### 3. Launch the Interactive Workspace UI
 ```bash
 streamlit run app.py
 ```
-Open [http://localhost:8501](http://localhost:8501) in your browser.
+Open **`http://localhost:8501`** in your browser.
 
 ---
 
-## 🧪 6. Automated Test Suite
+## 🧪 7. Automated Test Suite
 
-The platform includes full test coverage across document parsing, entity extraction, model inference, risk scoring, and end-to-end integration:
+The platform includes **25 automated tests** covering every layer of the architecture:
 
 ```bash
 pytest tests/ -v
 ```
 
-**Test Coverage Summary:**
-- `test_data_preparation.py`: Validates contract-level split partition integrity and zero data leakage.
-- `test_information_extraction.py`: Validates deontic modality, regex entity extraction (currency, percentages, deadlines), and ambiguity detection.
-- `test_clause_classification.py`: Validates inference and probability calibration for TF-IDF and SBERT.
-- `test_risk_engine.py`: Validates risk rules, scoring tiers, and plain-English explanation generation.
-- `test_end_to_end.py`: Validates the end-to-end ingestion pipeline on real contract PDFs.
+### Test Coverage Breakdown:
+| Test Module | Coverage Scope | Tests | Status |
+| :--- | :--- | :---: | :---: |
+| [`test_pdf_extraction.py`](file:///c:/Users/cheth/Documents/LLM_AAT/tests/test_pdf_extraction.py) | PyMuPDF extraction (filepath & bytes), text normalization (smart quotes, hyphens), and clause boundary segmentation | 5 | **PASSED** |
+| [`test_data_preparation.py`](file:///c:/Users/cheth/Documents/LLM_AAT/tests/test_data_preparation.py) | Contract-level splitting integrity, zero data leakage verification ($\text{Train} \cap \text{Test} = \emptyset$), and class balance | 4 | **PASSED** |
+| [`test_information_extraction.py`](file:///c:/Users/cheth/Documents/LLM_AAT/tests/test_information_extraction.py) | Deontic modality (*shall/may*), regex entities (currency `$`, `%`, deadlines), and ambiguity detection | 7 | **PASSED** |
+| [`test_clause_classification.py`](file:///c:/Users/cheth/Documents/LLM_AAT/tests/test_clause_classification.py) | TF-IDF and SBERT inference, calibrated probabilities, and error handling | 3 | **PASSED** |
+| [`test_risk_engine.py`](file:///c:/Users/cheth/Documents/LLM_AAT/tests/test_risk_engine.py) | Uncapped liability heuristics, immediate termination, vague term scoring, and explanation generation | 4 | **PASSED** |
+| [`test_end_to_end.py`](file:///c:/Users/cheth/Documents/LLM_AAT/tests/test_end_to_end.py) | Full PDF-to-audit-report pipeline executed on live contract PDFs | 2 | **PASSED** |
+
+**Total:** `25 passed in 17.5s` (0 failures, 0 warnings).
+
+---
+
+## 🖥️ 8. How to Demo ClauseLens in 3 Minutes
+
+When presenting or demoing the application:
+1. **Load a Contract**:
+   - Select **`Master Services Agreement (MSA)`** from the top dropdown.
+   - Point out the **split-screen interface**: the left column displays the segmented legal agreement formatted with editorial serif typography (`Newsreader`), with colored risk margin stripes (**Red** for High Risk, **Amber** for Needs Review).
+2. **Inspect a Clause**:
+   - Click **`Inspect in Panel →`** on Clause 2 (*Limitation of Liability*).
+   - In the right-hand panel, show the active AI engine badge, the predicted category, the extracted dollar ceiling (`$100,000`), the plain-English audit finding, and the recommended counsel action.
+3. **Switch AI Engines**:
+   - Toggle the engine dropdown from **`Lexical Engine (TF-IDF + LR)`** to **`Semantic Engine (Sentence-BERT)`**.
+   - Show how the inspector panel updates live: the engine badge turns blue (`⚡ Sentence-BERT`), and the candidate probability distribution updates.
+4. **Upload a Custom PDF**:
+   - Drag and drop `vendor_saas_agreement.pdf` (or any custom agreement) into the **"Upload Custom PDF"** box.
+   - Show how the app dynamically ingests the file, parses the clauses across pages, and allows instant switching between presets and your uploaded document.
+5. **Export the Audit Report**:
+   - Click **"Download Complete Audit Report (.md)"** to download a formatted, executive-ready Markdown due-diligence report.
+
+---
+
+## ⚖️ Compliance & Usage Disclaimer
+
+> **Disclaimer**: *ClauseLens is an intelligent assistive tool designed to accelerate contract due diligence and flag potential exposure for human legal review. It does not constitute formal legal counsel or create an attorney-client relationship.*

@@ -50,11 +50,24 @@ models/embeddings/*
 models/transformer/*
 !models/transformer/.gitkeep
 
+# Testing & Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# Logs & Temporary files
+*.log
+*.tmp
+scratch/
+
 # IDE & Editor specific
 .vscode/
 .idea/
 *.sublime-project
 *.sublime-workspace
+.streamlit/
 
 # Operating System files
 Thumbs.db

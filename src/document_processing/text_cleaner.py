@@ -12,9 +12,9 @@ def clean_text(text: str) -> str:
         return ""
     # Replace non-breaking spaces and irregular whitespace
     text = re.sub(r"[\xa0\u200b]", " ", text)
-    # Standardize quotation marks
-    text = re.sub(r'["""]', '"', text)
-    text = re.sub(r"[''']", "'", text)
+    # Standardize quotation marks (including curly/smart quotes)
+    text = re.sub(r"[\u201c\u201d\u201e\u201f\"]", '"', text)
+    text = re.sub(r"[\u2018\u2019\u201a\u201b\']", "'", text)
     # Collapse multiple spaces while keeping paragraphs intact
     text = re.sub(r"[ \t]+", " ", text)
     # Fix broken hyphenated words across lines
