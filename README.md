@@ -1,4 +1,4 @@
-# ClauseLens — Institutional Contract Audit & Risk Analysis Platform
+# ClauseLens - Institutional Contract Audit & Risk Analysis Platform
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.2+-ee4c2c.svg)](https://pytorch.org/)
