@@ -242,25 +242,6 @@ pytest tests/ -v
 
 ---
 
-## 🖥️ 8. How to Demo ClauseLens in 3 Minutes
-
-When presenting or demoing the application:
-1. **Load a Contract**:
-   - Select **`Master Services Agreement (MSA)`** from the top dropdown.
-   - Point out the **split-screen interface**: the left column displays the segmented legal agreement formatted with editorial serif typography (`Newsreader`), with colored risk margin stripes (**Red** for High Risk, **Amber** for Needs Review).
-2. **Inspect a Clause**:
-   - Click **`Inspect in Panel →`** on Clause 2 (*Limitation of Liability*).
-   - In the right-hand panel, show the active AI engine badge, the predicted category, the extracted dollar ceiling (`$100,000`), the plain-English audit finding, and the recommended counsel action.
-3. **Switch AI Engines**:
-   - Toggle the engine dropdown from **`Lexical Engine (TF-IDF + LR)`** to **`Semantic Engine (Sentence-BERT)`**.
-   - Show how the inspector panel updates live: the engine badge turns blue (`⚡ Sentence-BERT`), and the candidate probability distribution updates.
-4. **Upload a Custom PDF**:
-   - Drag and drop `vendor_saas_agreement.pdf` (or any custom agreement) into the **"Upload Custom PDF"** box.
-   - Show how the app dynamically ingests the file, parses the clauses across pages, and allows instant switching between presets and your uploaded document.
-5. **Export the Audit Report**:
-   - Click **"Download Complete Audit Report (.md)"** to download a formatted, executive-ready Markdown due-diligence report.
-
----
 
 ## ⚖️ Compliance & Usage Disclaimer
 
